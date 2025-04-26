@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="initial_word_length_range">
+        <item>4</item>
+        <item>8</item>
+    </array>
+</resources>

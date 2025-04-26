@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="How to Play Bulls and Cows"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. The computer generates a secret code (e.g., 4-digit number)\n\n2. You try to guess the code\n\n3. For each guess, you get feedback:\n   - Bulls: Correct digit in correct position\n   - Cows: Correct digit in wrong position\n\n4. Use the feedback to deduce the secret code\n\n5. Score points by guessing correctly in fewer attempts"
+            android:textSize="16sp"
+            android:lineSpacingMultiplier="1.2"/>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "643233834700",
+    "project_id": "bullsandcows-e43f0",
+    "storage_bucket": "bullsandcows-e43f0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643233834700:android:584489a74206dba1104469",
+        "android_client_info": {
+          "package_name": "com.example.bullsandcows"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh7SsYOLfbdTU51ncJRK3SuF9NjYjS4x0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:key="word_length"
+        app:title="Word Length"
+        app:summary="Choose how many digits the secret code has"
+        app:entries="@array/word_length_options"
+        app:entryValues="@array/word_length_values"
+        app:defaultValue="4" />
+
+    <ListPreference
+        app:key="game_duration"
+        app:title="Game Duration"
+        app:summary="Choose the duration of the game"
+        app:entries="@array/game_duration_options"
+        app:entryValues="@array/game_duration_values"
+        app:defaultValue="60" />
+
+    <ListPreference
+        app:key="attempts_limit"
+        app:title="Attempts Limit"
+        app:summary="Set how many attempts the player has"
+        app:entries="@array/attempts_options"
+        app:entryValues="@array/attempts_values"
+        app:defaultValue="3" />
+
+</PreferenceScreen>
