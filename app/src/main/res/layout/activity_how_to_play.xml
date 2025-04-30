@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_background1"
+    android:fillViewport="true"
     android:padding="16dp">
 
     <LinearLayout
@@ -9,19 +12,101 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Game Title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="How to Play Bulls and Cows"
-            android:textSize="22sp"
+            android:text="HOW TO PLAY BULLS &amp; COWS"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
             android:textStyle="bold"
+            android:fontFamily="@font/game_font"
+
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Game Icon -->
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/game_logo"
             android:layout_marginBottom="16dp"/>
+
+        <!-- Interactive Example Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#22000000"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Try This Example!"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Secret Code: 4271\nYour Guess: 1234"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="16dp"/>
+
+                <Button
+                    android:id="@+id/btn_show_feedback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show Feedback"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@android:color/white"
+                    android:layout_gravity="center_horizontal"/>
+
+                <TextView
+                    android:id="@+id/txt_feedback"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="16sp"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Game Instructions -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎯 1. The computer generates a secret code (e.g., 4-digit number)\n\n🔍 2. You try to guess the code\n\n🐂🐄 3. For each guess, you get feedback:\n   - Bulls: Correct digit in correct position\n   - Cows: Correct digit in wrong position\n\n🧠 4. Use the feedback to deduce the secret code\n\n🏆 5. Score points by guessing correctly in fewer attempts"
+            android:textSize="16sp"
+            android:lineSpacingMultiplier="1.3"/>
+
+        <!-- Tips Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💡 Pro Tips:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1. The computer generates a secret code (e.g., 4-digit number)\n\n2. You try to guess the code\n\n3. For each guess, you get feedback:\n   - Bulls: Correct digit in correct position\n   - Cows: Correct digit in wrong position\n\n4. Use the feedback to deduce the secret code\n\n5. Score points by guessing correctly in fewer attempts"
-            android:textSize="16sp"
-            android:lineSpacingMultiplier="1.2"/>
+            android:text="• Eliminate possibilities based on feedback\n• Track which numbers you've tried\n• Watch the timer - faster guesses score more!\n• Practice makes perfect!"
+            android:textSize="15sp"
+            android:drawablePadding="8dp"
+            android:lineSpacingMultiplier="1.4"/>
     </LinearLayout>
 </ScrollView>

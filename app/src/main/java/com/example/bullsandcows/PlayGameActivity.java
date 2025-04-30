@@ -2,7 +2,6 @@ package com.example.bullsandcows;
 
 import android.content.ContentValues;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -33,29 +32,34 @@ import java.util.Random;
 
 public class PlayGameActivity extends AppCompatActivity {
 
+    // UI Elements
     private TextView timerText, scoreText, attemptText, resultText;
     private EditText inputCode;
     private Button submitButton, replayButton;
     private ImageView moodIcon;
     private ProgressBar timerProgress;
     private RecyclerView previousAttemptsRecycler;
+
+    // Game Data
     private AttemptAdapter attemptAdapter;
     private ArrayList<String> attemptsHistory = new ArrayList<>();
-
-    private String username = null;
-
+    private String username;
+    private String secretCode;
     private int score = 0;
-    private int attemptsRemaining = 3;
+    private int attemptsRemaining;
     private int seconds = 0;
     private int maxGameSeconds = 60;
-    private String secretCode = "1234";
-    private Handler handler = new Handler();
 
+    // Firebase and SQLite
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+
+    // Sounds
     private MediaPlayer tickSound, winSound, loseSound;
 
-    private Runnable timerRunnable = new Runnable() {
+    // Timer
+    private final Handler handler = new Handler();
+    private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
             seconds++;
@@ -68,19 +72,36 @@ public class PlayGameActivity extends AppCompatActivity {
                 Toast.makeText(PlayGameActivity.this, "Time's up!", Toast.LENGTH_SHORT).show();
                 playSound(loseSound);
                 endGame();
-                return;
+            } else {
+                playSound(tickSound);
+                handler.postDelayed(this, 1000);
             }
-
-            playSound(tickSound);
-            handler.postDelayed(this, 1000);
         }
     };
+
+    // Lifecycle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_game);
 
+        initViews();
+        loadUserData();
+        loadGameSettings();
+        startNewGame();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(timerRunnable);
+        releaseSounds();
+    }
+
+    // Initialization
+
+    private void initViews() {
         timerText = findViewById(R.id.timer_text);
         scoreText = findViewById(R.id.score_text);
         attemptText = findViewById(R.id.attempts_text);
@@ -92,59 +113,65 @@ public class PlayGameActivity extends AppCompatActivity {
         timerProgress = findViewById(R.id.timer_progress);
         previousAttemptsRecycler = findViewById(R.id.previous_attempts_recycler);
 
-        db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
-
-
-        tickSound = MediaPlayer.create(this, R.raw.tick);
-        winSound = MediaPlayer.create(this, R.raw.sucess);
-        loseSound = MediaPlayer.create(this, R.raw.error);
-
-
-        GameDatabaseHelper dbHelper = new GameDatabaseHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT username FROM users ORDER BY id DESC LIMIT 1", null);
-        username = null;
-        if (cursor.moveToFirst()) {
-            username = cursor.getString(0);
-        }if (username != null) {
-                            TextView welcome = findViewById(R.id.player_name);
-                            welcome.setText("Hey, " + username + " 👋");
-                        }
-
-        cursor.close();
-        db.close();
-
-        //  Get username from SharedPreferences
-        SharedPreferences userPrefs = getSharedPreferences("user_data", MODE_PRIVATE);
-         username = userPrefs.getString("username", "Player");
-
-        //  Get game settings from PreferenceManager
-        SharedPreferences settingsprefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int wordLength = Integer.parseInt(settingsprefs.getString("word_length", "4"));
-        maxGameSeconds = Integer.parseInt(settingsprefs.getString("game_duration", "60"));
-        attemptsRemaining = Integer.parseInt(settingsprefs.getString("attempts_limit", "3"));
-
-        secretCode = generateSecretCode(wordLength);
-
+        // Recycler setup
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setReverseLayout(true);
         layoutManager.setStackFromEnd(true);
         previousAttemptsRecycler.setLayoutManager(layoutManager);
-
-
         attemptAdapter = new AttemptAdapter(attemptsHistory);
         previousAttemptsRecycler.setAdapter(attemptAdapter);
 
-        timerProgress.setMax(maxGameSeconds);
+        // Sound setup
+        tickSound = MediaPlayer.create(this, R.raw.tick);
+        winSound = MediaPlayer.create(this, R.raw.sucess);
+        loseSound = MediaPlayer.create(this, R.raw.error);
 
+        // Firebase
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        // Buttons
+        submitButton.setOnClickListener(v -> validateCode(inputCode.getText().toString()));
+        replayButton.setOnClickListener(v -> startNewGame());
+    }
+
+    private void loadUserData() {
+        SharedPreferences prefs = getSharedPreferences("user_data", MODE_PRIVATE);
+        username = prefs.getString("username", "Player");
+
+        TextView welcome = findViewById(R.id.player_name);
+        welcome.setText("Hey, " + username + " 👋");
+    }
+
+    private void loadGameSettings() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int wordLength = Integer.parseInt(prefs.getString("word_length", "4"));
+        maxGameSeconds = Integer.parseInt(prefs.getString("game_duration", "60"));
+        attemptsRemaining = Integer.parseInt(prefs.getString("attempts_limit", "3"));
+        timerProgress.setMax(maxGameSeconds);
+        secretCode = generateSecretCode(wordLength);
+    }
+
+    // Game Logic
+
+    private void startNewGame() {
+        handler.removeCallbacks(timerRunnable);
+        releaseSounds();
+        tickSound = MediaPlayer.create(this, R.raw.tick);
+
+        score = 0;
+        seconds = 0;
+        resultText.setText("");
+        inputCode.setText("");
+        inputCode.setEnabled(true);
+        submitButton.setEnabled(true);
+        replayButton.setVisibility(View.GONE);
+        attemptsHistory.clear();
+        attemptAdapter.notifyDataSetChanged();
+
+        loadGameSettings();
         updateUI();
         handler.post(timerRunnable);
-
-        submitButton.setOnClickListener(v -> validateCode(inputCode.getText().toString()));
-
-        replayButton.setOnClickListener(v -> resetGame(wordLength));
     }
 
     private void validateCode(String guess) {
@@ -165,23 +192,38 @@ public class PlayGameActivity extends AppCompatActivity {
             score += 10;
             moodIcon.setImageResource(R.drawable.ic_mode_happy);
             playSound(winSound);
-            moodIcon.animate().rotationYBy(360).setDuration(500).start(); //Animation
+            endGame();
         } else {
             attemptsRemaining--;
             moodIcon.setImageResource(R.drawable.ic_mode_sad);
-            moodIcon.animate().rotationYBy(360).setDuration(500).start(); //  Animation
+            moodIcon.animate().rotationBy(20f).setDuration(100)
+                    .withEndAction(() -> moodIcon.animate().rotationBy(-40f).setDuration(100)
+                            .withEndAction(() -> moodIcon.animate().rotationBy(20f).setDuration(100)))
+                    .start();
         }
-
 
         if (attemptsRemaining <= 0) {
             Toast.makeText(this, "Game Over! Code was: " + secretCode, Toast.LENGTH_LONG).show();
             playSound(loseSound);
-            tickSound.release();
             endGame();
         }
 
         updateUI();
         inputCode.setText("");
+    }
+
+    private void endGame() {
+        handler.removeCallbacks(timerRunnable);
+        inputCode.setEnabled(false);
+        submitButton.setEnabled(false);
+        replayButton.setVisibility(View.VISIBLE);
+        replayButton.setAlpha(0f);
+        replayButton.animate().alpha(1f).setDuration(500).start();
+
+        releaseSounds();
+
+        saveScoreToFirestore();
+        saveScoreLocal();
     }
 
     private void updateUI() {
@@ -195,16 +237,21 @@ public class PlayGameActivity extends AppCompatActivity {
         resultText.startAnimation(fadeIn);
     }
 
-    private void endGame() {
-        handler.removeCallbacks(timerRunnable);
-        submitButton.setEnabled(false);
-        inputCode.setEnabled(false);
-        replayButton.setVisibility(View.VISIBLE);
-        saveScoreToFirestore();
-        saveScoreLocal( username, score);
+    // Utilities
+
+    private void saveScoreToFirestore() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null && username != null) {
+            Map<String, Object> scoreEntry = new HashMap<>();
+            scoreEntry.put("username", username);
+            scoreEntry.put("score", score);
+            scoreEntry.put("timestamp", System.currentTimeMillis());
+
+            db.collection("scores").add(scoreEntry);
+        }
     }
 
-    public void saveScoreLocal(String username, int score) {
+    private void saveScoreLocal() {
         GameDatabaseHelper dbHelper = new GameDatabaseHelper(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -217,23 +264,16 @@ public class PlayGameActivity extends AppCompatActivity {
         db.close();
     }
 
+    private void playSound(MediaPlayer sound) {
+        if (sound != null) sound.start();
+    }
 
-    private void resetGame(int wordLength) {
-        score = 0;
-        seconds = 0;
-        secretCode = generateSecretCode(wordLength);
-        attemptsRemaining = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("attempts_limit", "3"));
-        timerProgress.setProgress(0);
-        attemptsHistory.clear();
-        attemptAdapter.notifyDataSetChanged();
-
-        resultText.setText("");
-        inputCode.setEnabled(true);
-        submitButton.setEnabled(true);
-        replayButton.setVisibility(View.GONE);
-        tickSound = MediaPlayer.create(this, R.raw.tick);
-        handler.post(timerRunnable);
-        updateUI();
+    private void releaseSounds() {
+        if (tickSound != null) {
+            tickSound.stop();
+            tickSound.release();
+            tickSound = null;
+        }
     }
 
     private String generateSecretCode(int length) {
@@ -246,9 +286,7 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     private String getBullsAndCows(String secret, String guess) {
-        if (secret.equals(guess)) {
-            return "You guessed it!";
-        }
+        if (secret.equals(guess)) return "You guessed it!";
 
         int bulls = 0, cows = 0;
         boolean[] secretMatched = new boolean[secret.length()];
@@ -274,42 +312,5 @@ public class PlayGameActivity extends AppCompatActivity {
         }
 
         return bulls + " 🐂 " + cows + " 🐄 ";
-    }
-
-    private void saveScoreToFirestore() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            db.collection("users")
-                    .document(user.getUid())
-                    .get()
-                    .addOnSuccessListener(document -> {
-                        String username = document.getString("username");
-                        if (username == null) username = user.getEmail();
-
-                        Map<String, Object> scoreEntry = new HashMap<>();
-                        scoreEntry.put("username", username);
-                        scoreEntry.put("score", score);
-
-                        db.collection("scores")
-                                .add(scoreEntry)
-                                .addOnSuccessListener(documentReference ->
-                                        Toast.makeText(this, "Score saved!", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(this, "Failed to save score.", Toast.LENGTH_SHORT).show());
-                    });
-        }
-    }
-
-    private void playSound(MediaPlayer sound) {
-        if (sound != null) sound.start();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacks(timerRunnable);
-        if (tickSound != null) tickSound.release();
-        if (winSound != null) winSound.release();
-        if (loseSound != null) loseSound.release();
     }
 }

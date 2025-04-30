@@ -15,10 +15,10 @@
             android:name=".PlayGameActivity"
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".RecentScoresActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".SettingsActivity"/>
         <activity android:name=".LeaderboardActivity"/>
         <activity android:name=".HowToPlayActivity"/>
-        <activity android:name=".RegisterActivity"/>
+        <activity android:name=".RegisterActivity" />
         <activity android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>

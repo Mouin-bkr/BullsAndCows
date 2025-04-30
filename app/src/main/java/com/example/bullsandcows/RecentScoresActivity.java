@@ -10,7 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class RecentScoresActivity extends AppCompatActivity {
 
@@ -29,9 +33,16 @@ public class RecentScoresActivity extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, scoreList);
         scoreListView.setAdapter(adapter);
 
+
         db = FirebaseFirestore.getInstance();
         loadRecentScores();
     }
+    private String formatTimestamp(Long millis) {
+        Date date = new Date(millis);
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        return sdf.format(date);
+    }
+
 
     private void loadRecentScores() {
         SharedPreferences prefs = getSharedPreferences("user_data", MODE_PRIVATE);
@@ -41,10 +52,8 @@ public class RecentScoresActivity extends AppCompatActivity {
             Toast.makeText(this, "Username not found", Toast.LENGTH_SHORT).show();
             return;
         }
-
         db.collection("scores")
                 .whereEqualTo("username", currentUsername)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(10)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -52,13 +61,19 @@ public class RecentScoresActivity extends AppCompatActivity {
                         scoreList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Long score = document.getLong("score");
-                            scoreList.add("Score: " + score);
+                            Long timestamp = document.getLong("timestamp");
+
+                            if (score != null && timestamp != null) {
+                                String formattedDate = formatTimestamp(timestamp);
+                                scoreList.add("Score: " + score + " (" + formattedDate + ")");
+                            }
                         }
                         adapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(this, "Failed to load your scores", Toast.LENGTH_SHORT).show();
                     }
                 });
+
     }
 
 }

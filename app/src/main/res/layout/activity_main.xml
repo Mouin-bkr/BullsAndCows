@@ -28,7 +28,8 @@
         app:layout_constraintStart_toEndOf="@id/playerAvatar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/playerAvatar"
-        android:layout_marginStart="12dp" />
+        android:layout_marginStart="12dp"
+        android:fontFamily="@font/game_font"/>
 
     <!-- Game Actions in a Card -->
     <com.google.android.material.card.MaterialCardView

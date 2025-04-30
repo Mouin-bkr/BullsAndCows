@@ -10,6 +10,12 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        // Set up toolbar with back button
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
+        }
+
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -18,10 +24,22 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
     public static class SettingsFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.preferences,rootKey);
+            setPreferencesFromResource(R.xml.preferences, rootKey);
+
+            // Customize preference categories if needed
+            // PreferenceCategory category = findPreference("your_category_key");
+            // if (category != null) {
+            //     category.setLayoutResource(R.layout.custom_preference_category);
+            // }
         }
     }
 }
