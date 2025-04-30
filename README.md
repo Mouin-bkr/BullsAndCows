@@ -34,7 +34,7 @@ Challenge yourself to guess the secret code before time runs out ⏱️, with bu
 
 1. Clone the repo
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/Mouin-bkr/BullsAndCows.git
 2. Open the project in Android Studio
 
 3. Connect your emulator or real device
