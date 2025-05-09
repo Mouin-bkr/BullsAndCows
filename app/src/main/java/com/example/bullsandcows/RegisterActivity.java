@@ -1,6 +1,7 @@
 package com.example.bullsandcows;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.TextView;
@@ -64,13 +65,19 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        saveUserToFirestore(username, email);
-                        Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, MainActivity.class));
-                        finish();
-                    } else {
+                .addOnCompleteListener(task -> {if (task.isSuccessful()) {
+                    saveUserToFirestore(username, email);
+
+                    // ✅ Save new username locally
+                    SharedPreferences prefs = getSharedPreferences("user_data", MODE_PRIVATE);
+                    prefs.edit().putString("username", username).apply();
+
+                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                }
+
+                else {
                         Toast.makeText(this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
